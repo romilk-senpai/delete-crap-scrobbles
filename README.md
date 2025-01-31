@@ -18,6 +18,8 @@ If you want another behaviour edit this function to your needs
 It asks for confirmation before deleting as well, and saves all the information in json format in the script directory such as *how it was before*, *what it is going to delete*, *what it have deleted*, *what it failed to delete*.
 
 Run with
-```python
+```sh
 	python delete_crap_scrobbles.py 
 ```
+
+Default timeout before request is set to 0.25f. You can try to set it lower but don't forget to respect the API or it won't respect you!
