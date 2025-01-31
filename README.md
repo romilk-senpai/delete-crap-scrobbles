@@ -16,3 +16,8 @@ If you want another behaviour edit this function to your needs
 	def filter_shitty_scrobbles(scrobbles, artist_counts)
 ```
 It asks for confirmation before deleting as well, and saves all the information in json format in the script directory such as *how it was before*, *what it is going to delete*, *what it have deleted*, *what it failed to delete*.
+
+Run with
+```python
+	python delete_crap_scrobbles.py 
+```
