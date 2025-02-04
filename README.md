@@ -15,6 +15,7 @@ If you want another behaviour edit this function to your needs
 ```python
 	def filter_shitty_scrobbles(scrobbles, artist_counts)
 ```
+Then it renames scrobbles artist e.g `artst feat. xxx` to `artist`. Patterns are specified in `main` function. Edit to your needs.
 It asks for confirmation before deleting as well, and saves all the information in json format in the script directory such as *how it was before*, *what it is going to delete*, *what it have deleted*, *what it failed to delete*.
 
 Run with
