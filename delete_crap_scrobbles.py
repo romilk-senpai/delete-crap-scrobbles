@@ -1,10 +1,11 @@
 import copy
 import json
+import unicodedata
 import requests
 import time
 
-API_KEY = 'YOUR_API_KEY'
-USERNAME = 'YOUR_USER_NAME'
+API_KEY = 'YOUR_TOKEN'
+USERNAME = 'YOUR_USERNAME'
 
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36'
 CSRFTOKEN = '1UHoPy15DXVMzbh0mAncNM0psDVgQcLf'
@@ -175,15 +176,18 @@ def filter_delete_simple(all_scrobbles):
     write_scrobbles_to_file(cleaned_scrobbles, 'cleaned_scrobbles.json')
     write_scrobbles_to_file(failed_scrobbles, 'failed_scrobbles.json') # you can retry
 
-def needs_editing(artist1, artist2):
-    return artist1.lower() in artist2.lower() and artist1.lower() != artist2.lower()
+def needs_editing(pattern, artist, corrected_name):
+    pattern_norm = unicodedata.normalize("NFKC", pattern).lower()
+    artist_norm = unicodedata.normalize("NFKC", artist).lower()
+    corrected_name_norm = unicodedata.normalize("NFKC", corrected_name).lower()
+    return pattern_norm in artist_norm and artist_norm != corrected_name_norm
 
 def rename_scrobbles(scrobbles, mappings):
     tuples = []
     for scrobble in scrobbles:
         artist_name = scrobble['artist']['#text']
         for patterns, corrected_name in mappings:
-            if any(needs_editing(pattern, artist_name) for pattern in patterns):
+            if any(needs_editing(pattern, artist_name, corrected_name) for pattern in patterns):
                 edited_scrobble = copy.deepcopy(scrobble)
                 edited_scrobble['artist']['#text'] = corrected_name
                 tuples.append((scrobble, edited_scrobble))
@@ -198,8 +202,8 @@ def write_tuples_to_file_readable(tuples, output_file='tuples_changes.txt'):
             file.write(f"{before} >>>>>>>> {after}\n")
 
 
-def rename_scrobble_artists(all_scrobbles):
-    tuples = rename_scrobbles(all_scrobbles)
+def rename_scrobble_artists(all_scrobbles, mappings):
+    tuples = rename_scrobbles(all_scrobbles, mappings)
     write_tuples_to_file_readable(tuples, 'tuples_changes.txt')    
     write_scrobbles_to_file(tuples, 'tuples_changes.json')
 
@@ -219,7 +223,7 @@ def rename_scrobble_artists(all_scrobbles):
 
 def main():
     all_scrobbles = get_all_scrobbles()
-    #write_scrobbles_to_file(all_scrobbles)
+    write_scrobbles_to_file(all_scrobbles)
     # if you parsed all of your scrobbles already you can read it from file
     # if you don't wan't to wait or to disturb api
     # all_scrobbles = read_scrobbles_from_file('scrobbles.json')
@@ -229,14 +233,10 @@ def main():
     # it will rename the artist inside the scrobble to the second item in tuple
     # sometime fails
     mappings = [
-        (['Diabarha', 'Legion of'], 'Diabarha'),
-        (['Aiobahn'], 'Aiobahn'),
         (['Atols'], 'Atols'),
-        (['相対性理论', 'Sōtaisei Riron'], '相対性理论'),
-        (['AVTechNO!'], 'AVTechNO!'),
-        (['Kikuo'], 'Kikuo'),
+        (['相対性理论', 'Sōtaisei'], '相対性理论'),
         (['Cynthoni'], 'Cynthoni'),
-        (["cosMo＠"], "cosMo＠暴走"),
+        (["cosMo"], "cosMo＠暴走P")
     ]
     rename_scrobble_artists(all_scrobbles, mappings)
 
